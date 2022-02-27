@@ -11,5 +11,6 @@ router.post('/',authByToken,ArticleController.createArticle)        //Create an 
 router.get('/:slug',ArticleController.getSingleArticleBySlug)       //Get an article
 router.patch('/:slug',authByToken,ArticleController.updateArticle)  //Update an article 
 router.delete('/:slug',authByToken,ArticleController.deleteArticle) //Delete an article
+router.get('/mature',ArticleController.getLastMatureArticles)       //Get most recent mature content
 
 module.exports = router

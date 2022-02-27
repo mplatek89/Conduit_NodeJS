@@ -49,6 +49,7 @@ module.exports.createArticle = async (req, res) => {
 		if (!data.title) throw new Error('Article title is required');
 		if (!data.body) throw new Error('Article body is required');
 		if (!data.description) throw new Error('Article description is required');
+		if (typeof data.isMature !== 'boolean') throw new Error('Article maturity is required');
 
 		//Find out author object
 		const user = await User.findByPk(req.user.email);
@@ -60,6 +61,7 @@ module.exports.createArticle = async (req, res) => {
 			description: data.description,
 			body: data.body,
 			UserEmail: user.email,
+            isMature: data.isMature
 		});
 
 		if (data.tagList) {
@@ -286,6 +288,42 @@ module.exports.getFeed = async (req, res) => {
 		const code = res.statusCode ? res.statusCode : 422;
 		return res.status(code).json({
 			errors: { body: ['Could not get feed ', e.message] },
+		});
+	}
+};
+
+module.exports.getLastMatureArticles = async (req, res) => {
+	const limit = 10;
+
+	try {
+		const articles = await Article.findAll({
+			where: {
+				isMature: true
+			},
+			include: [
+				{
+					model: Tag,
+					attributes: ['name'],
+				},
+				{
+					model: User,
+					attributes: ['email', 'username', 'bio', 'image'],
+				},
+			],
+			limit: parseInt(limit),
+		});
+
+		let response = [];
+		for (let t of articles) {
+			let addArt = sanitizeOutputMultiple(t);
+			response.push(addArt);
+		}
+
+		res.json({ response });
+	} catch (e) {
+		const code = res.statusCode ? res.statusCode : 422;
+		return res.status(code).json({
+			errors: { body: ['Could not get articles', e.message] },
 		});
 	}
 };
