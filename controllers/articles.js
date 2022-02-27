@@ -257,6 +257,12 @@ module.exports.getAllArticles = async (req, res) => {
 
 module.exports.getFeed = async (req, res) => {
 	try {
+        // MPLATEK: Potential sql injection at where
+        // For example add function to test email with regex
+        let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        if (!req.user.email.match(regexEmail)) {
+            throw new Error('it is not an email')
+        }
 		const query = `
             SELECT UserEmail
             FROM followers
